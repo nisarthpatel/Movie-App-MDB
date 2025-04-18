@@ -1,0 +1,7 @@
+.cardMedia {
+    transition: transform 0.3s ease;
+}
+
+.cardMedia:hover {
+    transform: scale(1.05);
+}
