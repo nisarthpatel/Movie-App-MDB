@@ -9,7 +9,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   Button,
   Drawer,
@@ -24,10 +23,10 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useContext } from "react";
 import { WatchlistContext } from "./watchlist/WatchlistContext";
+
 const NavBar = ({ toggleTheme, isDarkMode }) => {
   const { watchlist } = useContext(WatchlistContext);
   const watchlistCount = watchlist.length;
@@ -37,19 +36,7 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  // Keep track of watchlist count for the badge in NavBar
-  useEffect(() => {
-    const savedWatchlist = localStorage.getItem("watchlist");
-    if (savedWatchlist) {
-      try {
-        const watchlist = JSON.parse(savedWatchlist);
-        setWatchlistCount(watchlist.length);
-      } catch (error) {
-        console.error("Error parsing watchlist:", error);
-      }
-    }
-  }, []);
-  // Track scroll position for transparent to solid transition
+
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 20;
@@ -69,21 +56,14 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
   const navItems = [
     { name: "Home", path: "/", icon: <HomeIcon /> },
     { name: "Edit Movies", path: "/edit-movie", icon: <EditIcon /> },
-    // {
-    //   name: "Watchlist",
-    //   path: "/watchlist",
-    //   icon: (
-    //     <Badge badgeContent={watchlistCount} color="secondary">
-    //       <BookmarkIcon />
-    //     </Badge>
-    //   ),
-    // },
   ];
 
   const handleNavigation = (path) => {
     navigate(path);
     if (drawerOpen) setDrawerOpen(false);
   };
+
+  const textColor = isDarkMode ? "#ffffff" : "#000000";
 
   return (
     <AppBar
@@ -97,6 +77,7 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
           : "transparent",
         backdropFilter: scrolled ? "blur(10px)" : "none",
         transition: "all 0.3s ease",
+        color: textColor,
       }}
     >
       <Toolbar>
@@ -107,13 +88,14 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
             display: "flex",
             alignItems: "center",
             textDecoration: "none",
-            color: "inherit",
+            color: textColor,
           }}
         >
           <Avatar
             sx={{
               bgcolor: theme.palette.primary.main,
               marginRight: 1.5,
+              color: "#ffffff",
             }}
           >
             WM
@@ -123,6 +105,7 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
             sx={{
               fontWeight: 700,
               display: { xs: "none", sm: "block" },
+              color: textColor,
             }}
           >
             Watch Movies
@@ -136,7 +119,6 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
           {navItems.map((item) => (
             <Button
               key={item.name}
-              color="inherit"
               startIcon={item.icon}
               onClick={() => handleNavigation(item.path)}
               sx={{
@@ -145,6 +127,7 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
                 borderBottom: isActive(item.path)
                   ? `2px solid ${theme.palette.secondary.main}`
                   : "none",
+                color: textColor,
                 "&:hover": {
                   borderBottom: `2px solid ${theme.palette.secondary.light}`,
                 },
@@ -154,20 +137,8 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
             </Button>
           ))}
 
-          {/* <Tooltip title="Search Movies">
-            <IconButton
-              color="inherit"
-              sx={{ ml: 1 }}
-              onClick={() => handleNavigation("/search")}
-            >
-              <SearchIcon />
-            </IconButton>
-          </Tooltip> */}
-
-          <Tooltip
-            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            <IconButton color="inherit" onClick={toggleTheme} sx={{ ml: 1 }}>
+          <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+            <IconButton sx={{ ml: 1, color: textColor }} onClick={toggleTheme}>
               {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
@@ -180,6 +151,7 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
             color="inherit"
             aria-label="menu"
             onClick={() => setDrawerOpen(true)}
+            sx={{ color: textColor }}
           >
             <MenuIcon />
           </IconButton>
@@ -192,11 +164,15 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         PaperProps={{
-          sx: { width: 240, bgcolor: theme.palette.background.default },
+          sx: {
+            width: 240,
+            bgcolor: theme.palette.background.default,
+            color: textColor,
+          },
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
-          <IconButton onClick={() => setDrawerOpen(false)}>
+          <IconButton onClick={() => setDrawerOpen(false)} sx={{ color: textColor }}>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -211,6 +187,7 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
               sx={{
                 borderRadius: 1,
                 mb: 1,
+                color: textColor,
                 "&.Mui-selected": {
                   bgcolor: theme.palette.action.selected,
                   "&:hover": {
@@ -219,31 +196,34 @@ const NavBar = ({ toggleTheme, isDarkMode }) => {
                 },
               }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.name} />
+              <ListItemIcon sx={{ color: textColor }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.name} sx={{ color: textColor }} />
             </ListItem>
           ))}
 
           <ListItem
             button
             onClick={() => handleNavigation("/search")}
-            sx={{ borderRadius: 1, mb: 1 }}
+            sx={{ borderRadius: 1, mb: 1, color: textColor }}
           >
-            <ListItemIcon>
+            <ListItemIcon sx={{ color: textColor }}>
               <SearchIcon />
             </ListItemIcon>
-            <ListItemText primary="Search Movies" />
+            <ListItemText primary="Search Movies" sx={{ color: textColor }} />
           </ListItem>
 
           <ListItem
             button
             onClick={toggleTheme}
-            sx={{ borderRadius: 1, mb: 1 }}
+            sx={{ borderRadius: 1, mb: 1, color: textColor }}
           >
-            <ListItemIcon>
+            <ListItemIcon sx={{ color: textColor }}>
               {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </ListItemIcon>
-            <ListItemText primary={isDarkMode ? "Light Mode" : "Dark Mode"} />
+            <ListItemText
+              primary={isDarkMode ? "Light Mode" : "Dark Mode"}
+              sx={{ color: textColor }}
+            />
           </ListItem>
         </List>
       </Drawer>
